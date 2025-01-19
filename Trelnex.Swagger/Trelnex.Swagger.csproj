@@ -13,7 +13,7 @@
 
     <ItemGroup>
         <PackageReference Include="AspNetCore.Proxy" Version="4.5.0"/>
-        <PackageReference Include="Trelnex.Core.Api" Version="6.0.1"/>
+        <PackageReference Include="Trelnex.Core.Api" Version="5.1.0"/>
     </ItemGroup>
 
 </Project>
