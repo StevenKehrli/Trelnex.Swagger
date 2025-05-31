@@ -15,15 +15,21 @@ public static class SwaggerEndpointHealthCheckExtensions
     /// <param name="swaggerEndpoints">The collection of <see cref="SwaggerEndpoint"/> the specify the Swagger endpoints.</param>
     /// <returns>The <see cref="IHealthChecksBuilder"/>.</returns>
     public static IHealthChecksBuilder AddSwaggerEndpointHealthChecks(
-        this IHealthChecksBuilder builder,
-        SwaggerEndpoint[] swaggerEndpoints)
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
+        // get the swagger endpoints
+        var swaggerEndpoints = configuration.GetSwaggerEndpoints();
+
+        // Get or create the health checks builder.
+        var healthChecksBuilder = services.AddHealthChecks();
+
         // add the Swagger endpoint health checks
         Array.ForEach(swaggerEndpoints, swaggerEndpoint =>
         {
             var healthCheckName = $"SwaggerEndpointHealthCheck: {swaggerEndpoint.Name}";
 
-            builder.Add(
+            healthChecksBuilder.Add(
                 new HealthCheckRegistration(
                     name: healthCheckName,
                     factory: services =>
@@ -36,6 +42,15 @@ public static class SwaggerEndpointHealthCheckExtensions
                     tags: null));
         });
 
-        return builder;
+        return healthChecksBuilder;
+    }
+
+    public static SwaggerEndpoint[] GetSwaggerEndpoints(
+        this IConfiguration configuration)
+    {
+        // get the swagger configuration
+        var swaggerConfiguration = configuration.GetSection("SwaggerConfiguration").Get<SwaggerConfiguration>();
+
+        return swaggerConfiguration?.SwaggerEndpoints ?? [];
     }
 }

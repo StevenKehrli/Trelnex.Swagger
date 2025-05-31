@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Identity.Web;
 using Trelnex.Core.Api;
-using Trelnex.Swagger.Configuration;
 using Trelnex.Swagger.HealthChecks;
 
 // secured swagger
@@ -15,7 +14,7 @@ using Trelnex.Swagger.HealthChecks;
 // the external swagger url will proxy to an internal proxy endpoint (say, "https://petstore.swagger.io/v2/swagger.json")
 // this swagger configuration ccomes from the SwaggerConfiguration config section
 
-Application.Run(args, AddApplication, UseApplication, AddHealthChecks);
+Application.Run(args, AddApplication, UseApplication);
 
 return;
 
@@ -50,13 +49,15 @@ void AddApplication(
     // add the required services so we can proxy from local to remote
     // https://github.com/twitchax/AspNetCore.Proxy
     services.AddProxies();
+
+    services.AddSwaggerEndpointHealthChecks(configuration);
 }
 
 void UseApplication(
     WebApplication app)
 {
     // get the swagger endpoints
-    var swaggerEndpoints = GetSwaggerEndpoints(app.Configuration);
+    var swaggerEndpoints = app.Configuration.GetSwaggerEndpoints();
 
     // log the swagger endpoints
     foreach (var swaggerEndpoint in swaggerEndpoints)
@@ -109,23 +110,4 @@ void UseApplication(
             proxies.Map(swaggerEndpoint.SwaggerURL, proxy => proxy.UseHttp(swaggerEndpoint.ProxyEndpoint));
         }
     });
-}
-
-void AddHealthChecks(
-    IHealthChecksBuilder builder,
-    IConfiguration configuration)
-{
-    // get the swagger endpoints
-    var swaggerEndpoints = GetSwaggerEndpoints(configuration);
-
-    builder.AddSwaggerEndpointHealthChecks(swaggerEndpoints);
-}
-
-SwaggerEndpoint[] GetSwaggerEndpoints(
-    IConfiguration configuration)
-{
-    // get the swagger configuration
-    var swaggerConfiguration = configuration.GetSection("SwaggerConfiguration").Get<SwaggerConfiguration>();
-
-    return swaggerConfiguration?.SwaggerEndpoints ?? [];
 }
