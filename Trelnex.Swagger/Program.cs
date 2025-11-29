@@ -14,11 +14,11 @@ using Trelnex.Swagger.HealthChecks;
 // the external swagger url will proxy to an internal proxy endpoint (say, "https://petstore.swagger.io/v2/swagger.json")
 // this swagger configuration ccomes from the SwaggerConfiguration config section
 
-Application.Run(args, AddApplication, UseApplication);
+await Application.RunAsync(args, AddApplicationAsync, UseApplication);
 
 return;
 
-void AddApplication(
+async Task AddApplicationAsync(
     IServiceCollection services,
     IConfiguration configuration,
     ILogger bootstraplogger)
